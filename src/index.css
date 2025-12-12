@@ -1,0 +1,7 @@
+@import "tailwindcss";
+
+/* App-specific styles */
+:root {
+  --primary: #FDC500;
+  --dark: #0A0A0A;
+}
