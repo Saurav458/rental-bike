@@ -26,9 +26,26 @@ setFilteredCities([...filteredCities])
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <span>Bike Rentals</span>
+    <Dialog 
+      open={open} 
+      onClose={onClose} 
+      maxWidth="sm" 
+      fullWidth
+      PaperProps={{
+        sx: {
+          borderRadius: '16px',
+          maxHeight: '90vh',
+        }
+      }}
+    >
+      <DialogTitle sx={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center',
+        padding: '16px',
+        borderBottom: '1px solid #e0e0e0'
+      }}>
+        <span style={{ fontSize: '18px', fontWeight: 'bold' }}>Bike Rentals</span>
         <IconButton onClick={onClose} size="small">
           <CloseIcon />
         </IconButton>
@@ -104,10 +121,15 @@ setFilteredCities([...filteredCities])
         <Box
           sx={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
-            gap: 2,
-            maxHeight: '400px',
+            gridTemplateColumns: {
+              xs: 'repeat(2, 1fr)',
+              sm: 'repeat(2, 1fr)',
+              md: 'repeat(3, 1fr)',
+            },
+            gap: { xs: 1.5, sm: 2 },
+            maxHeight: { xs: '50vh', sm: '60vh', md: '400px' },
             overflowY: 'auto',
+            padding: '8px 0',
           }}
         >
           {filteredCities.map((city) => (
@@ -119,7 +141,7 @@ setFilteredCities([...filteredCities])
                 borderRadius: '8px',
                 overflow: 'hidden',
                 cursor: 'pointer',
-                height: '120px',
+                height: { xs: '100px', sm: '110px', md: '120px' },
                 backgroundImage: `url(${city.image})`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
