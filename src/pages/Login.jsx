@@ -1,36 +1,93 @@
 import { useState } from "react";
 import { Google } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
+import { auth } from "../config/firebase"; // Import Firebase auth instance
+import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
+import { checkPhoneExists } from "../api/auth"; // Import backend API function
 
-// Simulating API call
-const checkPhoneExists = async (phone) => {
-  // Replace this with real API
-  const existingPhones = ["6283831645", "9090909090"];
-  return existingPhones.includes(phone);
-};
-
+/**
+ * LOGIN PAGE - Same screen for both Login and Signup
+ * 
+ * FLOW:
+ * 1. User enters phone number
+ * 2. User clicks "Send OTP"
+ * 3. Component calls backend API to check if phone exists
+ * 4. Firebase reCAPTCHA verifier is set up
+ * 5. Firebase sends OTP code via SMS
+ * 6. User is navigated to OTP verification page with phone and exists flag
+ */
 export default function Login() {
   const [phone, setPhone] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
+  const [isLoading, setIsLoading] = useState(false); // Show loading state while sending OTP
   const navigate = useNavigate();
 
   // Validate phone - exactly 10 digits
   const isPhoneValid = phone.length === 10 && /^\d{10}$/.test(phone);
 
-  // STEP 1 : User clicks "Send OTP"
+  /**
+   * LINE-BY-LINE EXPLANATION OF SEND OTP FUNCTION:
+   * 
+   * STEP 1: Validate phone number format
+   * STEP 2: Call backend API to check if phone exists in database
+   * STEP 3: Set up Firebase reCAPTCHA verifier (for invisible verification)
+   * STEP 4: Use Firebase to send OTP via SMS
+   * STEP 5: Store confirmation result for later OTP verification
+   * STEP 6: Navigate to OTP page with phone and exists flag
+   */
+
+  // Setup Recaptcha only ONCE
+const setupRecaptcha = () => {
+  if (!window.recaptchaVerifier) {
+    window.recaptchaVerifier = new RecaptchaVerifier(
+      auth, // Correct order: auth first
+      "recaptcha-container",
+      {
+        size: "invisible",
+      }
+    );
+    window.recaptchaVerifier.render();
+  }
+};
+
+
   const handleSendOtp = async () => {
-    if (!isPhoneValid) return alert("Enter valid 10-digit phone number");
+  if (!isPhoneValid) return alert("Enter valid 10-digit phone number");
 
-    const exists = await checkPhoneExists(phone);
+  setIsLoading(true);
 
-    if (exists) {
-      // Existing user → go to OTP page
-      navigate("/login/otp", { state: { phone } });
-    } else {
-      // New user → go to signup
-      navigate("/signup", { state: { phone } });
-    }
-  };
+  try {
+    // Check if phone exists from backend
+    const response = await checkPhoneExists(phone);
+    const exists = response.success;
+
+    // 1️⃣ Setup reCAPTCHA properly
+    setupRecaptcha();
+    const appVerifier = window.recaptchaVerifier;
+
+    // 2️⃣ Send OTP
+    const fullPhoneNumber = "+91" + phone;
+    const confirmationResult = await signInWithPhoneNumber(
+      auth,
+      fullPhoneNumber,
+      appVerifier
+    );
+
+    // 3️⃣ Store confirmationResult globally
+    window.confirmationResult = confirmationResult;
+
+    // 4️⃣ Navigate to OTP screen with data
+    navigate("/login/otp", {
+      state: { phone, exists },
+    });
+  } catch (error) {
+    console.error("OTP Error → ", error);
+    setErrorMsg(error.message || "Failed to send OTP");
+    setTimeout(() => setErrorMsg(""), 3000);
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   const handleClick=()=>{
     navigate("https://accounts.google.com/o/oauth2/v2/auth?client_id=265654138751-oeub5439nnou57a17usm52m2baq268hi.apps.googleusercontent.com&redirect_uri=http://localhost:5173/&response_type=code&scope=openid%20email%20profile&access_type=offline&prompt=consent");
@@ -103,15 +160,18 @@ export default function Login() {
 
           <button
             onClick={handleSendOtp}
-            disabled={!isPhoneValid}
+            disabled={!isPhoneValid || isLoading}
             className={`w-full py-3 rounded-xl font-bold text-lg transition duration-200 ${
-              isPhoneValid
+              isPhoneValid && !isLoading
                 ? "bg-primary text-black hover:opacity-90 cursor-pointer shadow-lg"
                 : "bg-gray-300 text-gray-600 cursor-not-allowed"
             }`}
           >
-            {isPhoneValid ? "✓ Send OTP" : "Send OTP"}
+            {isLoading ? "Sending OTP..." : isPhoneValid ? "✓ Send OTP" : "Send OTP"}
           </button>
+
+          {/* Firebase reCAPTCHA container - REQUIRED for Firebase Phone Auth */}
+          {/* <div id="recaptcha-container"></div> */}
 
           <div className="flex items-center py-4">
             <span className="flex-1 border-t border-gray-300" />

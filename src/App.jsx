@@ -3,7 +3,10 @@ import './App.css'
 
 function App() {
   return (
+    <>
+    <div id="recaptcha-container"></div>
     <AppRoutes />
+    </>
   )
 }
 

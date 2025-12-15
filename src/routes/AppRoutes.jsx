@@ -3,7 +3,7 @@ import MainLayout from "../layouts/MainLayout";
 import Home from "../pages/Home";
 import Login from "../pages/Login";
 import OTP from "../pages/OTP";
-import Signup from "../pages/Signup";
+import UserEdit from "../pages/UserEdit";
 import AuthLayout from '../layouts/AuthLayout';
 export default function AppRoutes() {
     return (
@@ -38,12 +38,22 @@ export default function AppRoutes() {
                     }
                 />
 
+                {/* User Edit Route - For new users to fill name and email */}
+                <Route
+                    path="/user/edit"
+                    element={
+                        <MainLayout>
+                            <UserEdit />
+                        </MainLayout>
+                    }
+                />
+
                 {/* Signup Route - For New Users */}
                 <Route
                     path="/signup"
                     element={
                         <MainLayout>
-                            <Signup />
+                            <Login />
                         </MainLayout>
                     }
                 />

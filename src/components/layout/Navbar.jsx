@@ -12,7 +12,7 @@ const Navbar = () => {
     return (
         <nav className="sticky top-0 z-50 bg-black text-white shadow-lg">
             <div className="max-w-7xl mx-auto px-6">
-                <div className="flex justify-between items-center h-16">
+                <div className="flex justify-between items-center h-17">
                     {/* Logo */}
                     <Link to="/" className="flex-shrink-0 flex items-center gap-2 hover:opacity-80 transition">
                         <div className="w-8 h-8 bg-white rounded flex items-center justify-center">
@@ -27,7 +27,7 @@ const Navbar = () => {
                             <Link
                                 key={index}
                                 to={link.href}
-                                className="text-white hover:text-gray-300 transition duration-200 text-sm font-medium"
+                                className="text-white hover:text-white-300 transition duration-200 text-sm font-medium"
                             >
                                 {link.label}
                             </Link>
@@ -38,7 +38,7 @@ const Navbar = () => {
                     <div className="hidden md:flex items-center gap-2">
                         <button
                             onClick={() => setIsModalOpen(true)}
-                            className="flex items-center gap-2 text-gray-300 hover:text-white transition duration-200"
+                            className="flex  gap-2 px-7 py-2 border-2 border-gray-400 rounded-lg text-gray-300 hover:text-white hover:border-primary hover:bg-gray-900 transition duration-200 cursor-pointer"
                         >
                             <LocationOnIcon sx={{ fontSize: '20px' }} />
                             <span className="text-sm font-medium">{selectedCity}</span>
